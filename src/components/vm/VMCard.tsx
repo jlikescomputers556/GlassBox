@@ -21,26 +21,27 @@ export default function VMCard({
 }) {
   const S = {
     card: {
-      background: "#13161e",
+      background: "linear-gradient(145deg, #13161e, #0f1218)",
       border: `1px solid ${
-        selected ? "#4f9cf9" : "rgba(255,255,255,0.07)"
+        selected ? "#4f9cf9" : "rgba(255,255,255,0.05)"
       }`,
-      borderRadius: "12px",
+      borderRadius: "14px",
       overflow: "hidden",
       cursor: "pointer",
-      transition: "border-color .2s, transform .15s",
-    },
+      transition: "all .2s ease",
+      boxShadow: selected
+        ? "0 0 0 1px #4f9cf9, 0 10px 30px rgba(0,0,0,0.4)"
+        : "0 6px 20px rgba(0,0,0,0.25)",
+  },
     preview: {
       height: "90px",
-      background:
-        vm.status === "running"
-          ? "rgba(110,231,183,.06)"
-          : vm.status === "paused"
-          ? "rgba(249,162,79,.06)"
-          : "transparent",
-      padding: "10px 12px",
-      fontFamily: "monospace",
-      fontSize: "9.5px",
+      background: "rgba(255,255,255,0.02)",
+      borderBottom: "1px solid rgba(255,255,255,0.05)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "12px",
+      fontWeight: 500,
     },
     vmInfo: { padding: "10px 12px 6px" },
     vmHeader: {
@@ -50,9 +51,10 @@ export default function VMCard({
       marginBottom: "3px",
     },
     vmName: {
-      fontSize: "13px",
+      fontSize: "14px",
       fontWeight: 600,
       flex: 1,
+      letterSpacing: "-0.2px",
     },
     dot: {
       width: "7px",
@@ -66,55 +68,89 @@ export default function VMCard({
           : "#7a7f94",
     },
     badge: {
-      fontSize: "9px",
-      padding: "1px 6px",
-      borderRadius: "3px",
-      background: "rgba(122,127,148,.15)",
-      color: "#7a7f94",
-    },
+      fontSize: "10px",
+      padding: "2px 7px",
+      borderRadius: "5px",
+      fontWeight: 500,
+      background:
+        vm.status === "running"
+          ? "rgba(110,231,183,.12)"
+          : vm.status === "paused"
+          ? "rgba(249,162,79,.12)"
+          : "rgba(122,127,148,.15)",
+      color:
+        vm.status === "running"
+          ? "#6ee7b7"
+          : vm.status === "paused"
+          ? "#f9a24f"
+          : "#7a7f94",
+      },
     actions: {
       display: "flex",
-      gap: "4px",
-      padding: "4px 10px 10px",
+      gap: "6px",
+      padding: "6px 10px 12px",
+      borderTop: "1px solid rgba(255,255,255,0.05)",
     },
     btn: {
-      width: "28px",
-      height: "28px",
+      width: "30px",
+      height: "30px",
       background: "#1a1e2a",
       border: "1px solid rgba(255,255,255,0.07)",
-      borderRadius: "6px",
+      borderRadius: "8px",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
       cursor: "pointer",
+      transition: "all 0.15s ease",
     },
   };
 
-  return (
-    <div style={S.card} onClick={onSelect}>
-      <div style={S.preview}>
-        {vm.status === "running" ? "Running..." : "Stopped"}
-      </div>
+ return (
+  <div 
+    style={S.card} 
+    onClick={onSelect}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.transform = "translateY(-4px) scale(1.01)";
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.transform = "translateY(0) scale(1)"
+    }}
+    >
+    <div style={S.preview}>
+      {vm.status === "running" ? (
+        <span style={{ color: "#6ee7b7" }}>Running</span>
+      ) : vm.status === "paused" ? (
+        <span style={{ color: "#f9a24f" }}>Paused</span>
+      ) : (
+        <span style={{ color: "#7a7f94" }}>Stopped</span>
+      )}
+    </div>
 
-      <div style={S.vmInfo}>
-        <div style={S.vmHeader}>
-          <div style={S.dot}></div>
-          <div style={S.vmName}>{vm.name}</div>
-          <span style={S.badge}>{vm.status}</span>
-        </div>
-      </div>
-
-      <div style={S.actions}>
-        <div
-          style={S.btn}
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggle();
-          }}
-        >
-          {vm.status === "running" ? "■" : "▶"}
-        </div>
+    <div style={S.vmInfo}>
+      <div style={S.vmHeader}>
+        <div style={S.dot}></div>
+        <div style={S.vmName}>{vm.name}</div>
+        <span style={S.badge}>{vm.status}</span>
       </div>
     </div>
-  );
+
+    <div style={S.actions}>
+      <div
+        style={S.btn}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle();
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#222636";
+        }}
+        onMouseLeave={(e) => {          
+          e.currentTarget.style.background = "#1a1e2a";
+        }}
+      >
+        {vm.status === "running" ? "■" : "▶"}
+      </div>
+    </div>
+  </div>
+);
 }
