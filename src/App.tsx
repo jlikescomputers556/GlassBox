@@ -1,6 +1,10 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 
+import VMCard from "./components/vm/VMCard";
+import Topbar from "./components/Topbar";
+import Sidebar from "./components/Sidebar";
+
 interface VM {
   name: string;
   status: "running" | "stopped" | "paused";
@@ -27,9 +31,6 @@ const Icon = {
 
 const S = {
   app: { background: "#0d0f14", minHeight: "100vh", color: "#e8eaf0", fontFamily: "'Segoe UI', system-ui, sans-serif", display: "flex" } as React.CSSProperties,
-  sidebar: { width: "52px", background: "#13161e", borderRight: "1px solid rgba(255,255,255,0.07)", display: "flex", flexDirection: "column" as const, alignItems: "center", padding: "14px 0", gap: "6px", flexShrink: 0 },
-  logo: { width: "32px", height: "32px", background: "#4f9cf9", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "10px" },
-  navIcon: (active: boolean) => ({ width: "36px", height: "36px", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: active ? "#1a1e2a" : "transparent", color: active ? "#4f9cf9" : "#7a7f94" }),
   main: { flex: 1, padding: "18px 20px", overflow: "auto" as const },
   topbar: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "18px" },
   h1: { fontSize: "15px", fontWeight: 600, flex: 1, letterSpacing: "-0.2px" },
@@ -114,55 +115,26 @@ export default function App() {
 
   return (
     <div style={S.app}>
-      <div style={S.sidebar}>
-        <div style={S.logo}>{Icon.logo}</div>
-        {[Icon.grid, Icon.clock, Icon.network, Icon.settings].map((icon, i) => (
-          <div key={i} style={S.navIcon(i === 0)}>{icon}</div>
-        ))}
-        <div style={{ ...S.navIcon(false), marginTop: "auto" }}>{Icon.settings}</div>
-      </div>
-
+      <Sidebar Icon={Icon} />
       <div style={S.main}>
-        <div style={S.topbar}>
-          <h1 style={S.h1}>Virtual Machines</h1>
-          <div style={S.searchWrap}>
-            <span style={S.searchIcon}>{Icon.search}</span>
-            <input style={S.search} placeholder="Search VMs…" value={search} onChange={e => setSearch(e.target.value)} />
-          </div>
-          {["all", "running", "stopped"].map(f => (
-            <button key={f} style={S.btn(false, filter === f)} onClick={() => setFilter(f)}>
-              {f.charAt(0).toUpperCase() + f.slice(1)}
-            </button>
-          ))}
-          <button style={S.btn(true)}>
-            {Icon.plus} New VM
-          </button>
-        </div>
+        <Topbar
+          search={search}
+          setSearch={setSearch}
+          filter={filter}
+          setFilter={setFilter}
+        />
 
         <div style={{ display: "flex", gap: "12px" }}>
           <div style={{ ...S.grid, flex: 1 }}>
-            {filtered.map(vm => (
-              <div key={vm.name} style={S.card(selected === vm.name)} onClick={() => setSelected(vm.name)}>
-                <Preview vm={vm} />
-                <div style={S.vmInfo}>
-                  <div style={S.vmHeader}>
-                    <div style={S.dot(vm.status)}></div>
-                    <div style={S.vmName}>{vm.name}</div>
-                    <span style={S.badge(vm.status)}>{vm.status}</span>
-                  </div>
-                  <div style={S.vmOs}>VirtualBox · 2 vCPU</div>
-                </div>
-                <div style={S.actions}>
-                  <div style={S.iconBtn(vm.status === "running" ? "#f96f6f" : "#6ee7b7")}
-                    onClick={e => { e.stopPropagation(); toggleVM(vm); }}>
-                    {vm.status === "running" ? Icon.stop : Icon.play}
-                  </div>
-                  <div style={S.iconBtn()} onClick={e => e.stopPropagation()}>{Icon.snapshot}</div>
-                  <div style={S.iconBtn()} onClick={e => e.stopPropagation()}>{Icon.clone}</div>
-                  <div style={S.iconBtn()} onClick={e => e.stopPropagation()}>{Icon.trash}</div>
-                </div>
-              </div>
-            ))}
+           {filtered.map(vm => (
+            <VMCard
+              key={vm.name}
+              vm={vm}
+              selected={selected === vm.name}
+              onSelect={() => setSelected(vm.name)}
+              onToggle={() => toggleVM(vm)}
+            />
+          ))}
           </div>
 
           {sel && (
